@@ -346,9 +346,6 @@ window.addEventListener('keydown', (e) => {
             // Start screen is active: use Space/Enter to "select" and start
             startGame();
         }
-        // If on Game Over screen, Space/Enter will NOT restart the game
-        // per user request ("not to restart the game"). 
-        // Restart must be done via the button.
     }
 });
 
