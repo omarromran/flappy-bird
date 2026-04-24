@@ -57,6 +57,75 @@ avatarOptions.forEach(option => {
     });
 });
 
+function trimImage(img) {
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = img.width;
+    tempCanvas.height = img.height;
+    tempCtx.drawImage(img, 0, 0);
+
+    const pixels = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    const l = pixels.data.length;
+    let bound = {
+        top: null,
+        left: null,
+        right: null,
+        bottom: null
+    };
+    let x, y;
+
+    for (let i = 0; i < l; i += 4) {
+        if (pixels.data[i + 3] > 0) {
+            x = (i / 4) % tempCanvas.width;
+            y = Math.floor((i / 4) / tempCanvas.width);
+
+            if (bound.top === null || y < bound.top) bound.top = y;
+            if (bound.left === null || x < bound.left) bound.left = x;
+            if (bound.right === null || x > bound.right) bound.right = x;
+            if (bound.bottom === null || y > bound.bottom) bound.bottom = y;
+        }
+    }
+
+    if (bound.top === null) return img.src; // Empty image
+
+    const trimHeight = bound.bottom - bound.top + 1;
+    const trimWidth = bound.right - bound.left + 1;
+    const trimmed = tempCtx.getImageData(bound.left, bound.top, trimWidth, trimHeight);
+
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = trimWidth;
+    outCanvas.height = trimHeight;
+    const outCtx = outCanvas.getContext('2d');
+    outCtx.putImageData(trimmed, 0, 0);
+
+    return outCanvas.toDataURL();
+}
+
+// Auto-trim default avatars
+function autoTrimAvatars() {
+    avatarOptions.forEach(option => {
+        const img = option.querySelector('img');
+        if (img) {
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                const trimmedSrc = trimImage(tempImg);
+                img.src = trimmedSrc;
+                option.dataset.src = trimmedSrc;
+
+                // If this is the currently selected bird, update it
+                if (option.classList.contains('selected')) {
+                    selectedAvatarSrc = trimmedSrc;
+                    bird.img.src = selectedAvatarSrc;
+                }
+            };
+            tempImg.src = img.src;
+        }
+    });
+}
+
+// Initial trim for default options
+autoTrimAvatars();
+
 // Image Upload
 uploadTrigger.addEventListener('click', () => avatarUpload.click());
 
@@ -65,22 +134,28 @@ avatarUpload.addEventListener('change', (e) => {
     if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
-            avatarOptions.forEach(opt => opt.classList.remove('selected'));
-            uploadTrigger.classList.add('selected');
-            
-            // Preview uploaded image in the upload box
-            let preview = uploadTrigger.querySelector('img');
-            if (!preview) {
-                preview = document.createElement('img');
-                uploadTrigger.innerHTML = '';
-                uploadTrigger.appendChild(preview);
-            }
-            preview.src = event.target.result;
-            preview.style.borderRadius = '50%';
-            preview.style.objectFit = 'cover';
-            
-            selectedAvatarSrc = event.target.result;
-            bird.img.src = selectedAvatarSrc;
+            const img = new Image();
+            img.onload = () => {
+                const trimmedSrc = trimImage(img);
+
+                avatarOptions.forEach(opt => opt.classList.remove('selected'));
+                uploadTrigger.classList.add('selected');
+
+                // Preview uploaded image in the upload box
+                let preview = uploadTrigger.querySelector('img');
+                if (!preview) {
+                    preview = document.createElement('img');
+                    uploadTrigger.innerHTML = '';
+                    uploadTrigger.appendChild(preview);
+                }
+                preview.src = trimmedSrc;
+                preview.style.borderRadius = '50%';
+                preview.style.objectFit = 'cover';
+
+                selectedAvatarSrc = trimmedSrc;
+                bird.img.src = selectedAvatarSrc;
+            };
+            img.src = event.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -100,7 +175,7 @@ function spawnPipe() {
     const minHeight = 50;
     const maxHeight = canvas.height - PIPE_GAP - minHeight;
     const height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-    
+
     pipes.push({
         x: canvas.width,
         topHeight: height,
@@ -125,7 +200,8 @@ function update() {
         spawnPipe();
     }
 
-    pipes.forEach((pipe, index) => {
+    for (let i = pipes.length - 1; i >= 0; i--) {
+        const pipe = pipes[i];
         pipe.x -= PIPE_SPEED;
 
         // Collision detection (pipes)
@@ -149,9 +225,9 @@ function update() {
 
         // Remove off-screen pipes
         if (pipe.x + 60 < 0) {
-            pipes.splice(index, 1);
+            pipes.splice(i, 1);
         }
-    });
+    }
 
     frameCount++;
 }
@@ -159,62 +235,62 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Draw Pipes
-pipes.forEach(pipe => {
-    // Top pipe gradient
-    let topGrad = ctx.createLinearGradient(pipe.x, 0, pipe.x + 60, 0);
-    topGrad.addColorStop(0, '#22c55e');
-    topGrad.addColorStop(0.5, '#4ade80');
-    topGrad.addColorStop(1, '#16a34a');
-    
-    ctx.fillStyle = topGrad;
-    ctx.fillRect(pipe.x, 0, 60, pipe.topHeight);
-    
-    // Bottom pipe gradient
-    let botGrad = ctx.createLinearGradient(pipe.x, pipe.topHeight + PIPE_GAP, pipe.x + 60, pipe.topHeight + PIPE_GAP);
-    botGrad.addColorStop(0, '#22c55e');
-    botGrad.addColorStop(0.5, '#4ade80');
-    botGrad.addColorStop(1, '#16a34a');
-    
-    ctx.fillStyle = botGrad;
-    ctx.fillRect(pipe.x, pipe.topHeight + PIPE_GAP, 60, canvas.height);
-    
-    // Pipe Caps (aesthetic details)
-    ctx.fillStyle = '#15803d';
-    ctx.fillRect(pipe.x - 4, pipe.topHeight - 20, 68, 20); // Top cap
-    ctx.fillRect(pipe.x - 4, pipe.topHeight + PIPE_GAP, 68, 20); // Bottom cap
-    
-    // Glossy effect on pipes
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.fillRect(pipe.x + 10, 0, 10, pipe.topHeight);
-    ctx.fillRect(pipe.x + 10, pipe.topHeight + PIPE_GAP, 10, canvas.height);
-});
+    // Draw Pipes
+    pipes.forEach(pipe => {
+        // Top pipe gradient
+        let topGrad = ctx.createLinearGradient(pipe.x, 0, pipe.x + 60, 0);
+        topGrad.addColorStop(0, '#22c55e');
+        topGrad.addColorStop(0.5, '#4ade80');
+        topGrad.addColorStop(1, '#16a34a');
 
-// Draw Bird
-ctx.save();
-ctx.translate(bird.x, bird.y);
-// Smooth rotation based on velocity
-const rotation = Math.min(Math.PI / 3, Math.max(-Math.PI / 4, bird.velocity * 0.12));
-ctx.rotate(rotation);
+        ctx.fillStyle = topGrad;
+        ctx.fillRect(pipe.x, 0, 60, pipe.topHeight);
 
-// Add a subtle trail effect or shadow
-ctx.shadowBlur = 15;
-ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        // Bottom pipe gradient
+        let botGrad = ctx.createLinearGradient(pipe.x, pipe.topHeight + PIPE_GAP, pipe.x + 60, pipe.topHeight + PIPE_GAP);
+        botGrad.addColorStop(0, '#22c55e');
+        botGrad.addColorStop(0.5, '#4ade80');
+        botGrad.addColorStop(1, '#16a34a');
 
-// Rounded clipping path
-ctx.beginPath();
-ctx.arc(0, 0, BIRD_SIZE / 2, 0, Math.PI * 2);
-ctx.clip();
+        ctx.fillStyle = botGrad;
+        ctx.fillRect(pipe.x, pipe.topHeight + PIPE_GAP, 60, canvas.height);
 
-try {
-    ctx.drawImage(bird.img, -BIRD_SIZE/2, -BIRD_SIZE/2, BIRD_SIZE, BIRD_SIZE);
-} catch(e) {
-    ctx.fillStyle = '#f59e0b';
+        // Pipe Caps (aesthetic details)
+        ctx.fillStyle = '#15803d';
+        ctx.fillRect(pipe.x - 4, pipe.topHeight - 20, 68, 20); // Top cap
+        ctx.fillRect(pipe.x - 4, pipe.topHeight + PIPE_GAP, 68, 20); // Bottom cap
+
+        // Glossy effect on pipes
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fillRect(pipe.x + 10, 0, 10, pipe.topHeight);
+        ctx.fillRect(pipe.x + 10, pipe.topHeight + PIPE_GAP, 10, canvas.height);
+    });
+
+    // Draw Bird
+    ctx.save();
+    ctx.translate(bird.x, bird.y);
+    // Smooth rotation based on velocity
+    const rotation = Math.min(Math.PI / 3, Math.max(-Math.PI / 4, bird.velocity * 0.12));
+    ctx.rotate(rotation);
+
+    // Add a subtle trail effect or shadow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+
+    // Rounded clipping path
     ctx.beginPath();
-    ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
-    ctx.fill();
-}
-ctx.restore();
+    ctx.arc(0, 0, BIRD_SIZE / 2, 0, Math.PI * 2);
+    ctx.clip();
+
+    try {
+        ctx.drawImage(bird.img, -BIRD_SIZE / 2, -BIRD_SIZE / 2, BIRD_SIZE, BIRD_SIZE);
+    } catch (e) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
 
     if (gameRunning) {
         requestAnimationFrame(() => {
@@ -245,10 +321,10 @@ function gameOver() {
         bestScore = score;
         localStorage.setItem('flappyBest', bestScore);
     }
-    
+
     finalScoreElement.innerText = score;
     bestScoreElement.innerText = bestScore;
-    
+
     gameOverScreen.classList.remove('hidden');
     gameUI.classList.add('hidden');
 }
@@ -260,12 +336,19 @@ function showMenu() {
 
 // Controls
 window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        if (!gameRunning && startScreen.classList.contains('hidden') && !gameOverScreen.classList.contains('hidden')) {
-            // Already handled by button but just in case
-        } else {
+    if (e.code === 'Space' || e.code === 'Enter') {
+        // Prevent default browser behavior (scrolling or clicking focused buttons)
+        e.preventDefault();
+
+        if (gameRunning) {
             jump();
+        } else if (!startScreen.classList.contains('hidden')) {
+            // Start screen is active: use Space/Enter to "select" and start
+            startGame();
         }
+        // If on Game Over screen, Space/Enter will NOT restart the game
+        // per user request ("not to restart the game"). 
+        // Restart must be done via the button.
     }
 });
 
