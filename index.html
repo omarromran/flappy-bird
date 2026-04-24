@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Avatar - Premium Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>Flappy Avatar</h1>
+            <p>Choose your character or upload your own!</p>
+            
+            <div class="avatar-selector">
+                <div class="avatar-option selected" data-type="default" data-src="biba.png">
+                    <img src="biba.png" alt="Biba">
+                </div>
+                <div class="avatar-option" data-type="default" data-src="bird_golden_1777041651746.png">
+                    <img src="bird_golden_1777041651746.png" alt="Golden Bird">
+                </div>
+                <div class="avatar-option" data-type="default" data-src="bird_blue_1777041696176.png">
+                    <img src="bird_blue_1777041696176.png" alt="Blue Bird">
+                </div>
+                <div class="avatar-option" data-type="default" data-src="bird_red_1777041933292.png">
+                    <img src="bird_red_1777041933292.png" alt="Red Bird">
+                </div>
+                <div class="avatar-option" data-type="default" data-src="bird_green_1777042200352.png">
+                    <img src="bird_green_1777042200352.png" alt="Green Bird">
+                </div>
+                <div class="avatar-option upload-option" id="upload-trigger">
+                    <div class="upload-icon">+</div>
+                    <span>Upload</span>
+                    <input type="file" id="avatar-upload" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <button id="start-btn" class="main-btn">START GAME</button>
+            
+            <div class="instructions">
+                <span>Press <b>SPACE</b> or <b>TAP</b> to Fly</span>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h2>GAME OVER</h2>
+            <div class="score-card">
+                <div class="score-label">SCORE</div>
+                <div id="final-score" class="score-value">0</div>
+                <div class="score-label">BEST</div>
+                <div id="best-score" class="score-value">0</div>
+            </div>
+            <button id="restart-btn" class="main-btn">PLAY AGAIN</button>
+            <button id="menu-btn" class="secondary-btn">CHARACTER MENU</button>
+        </div>
+
+        <!-- In-game UI -->
+        <div id="game-ui" class="hidden">
+            <div id="current-score">0</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
