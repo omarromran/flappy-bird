@@ -3,8 +3,8 @@
   "short_name": "bird game",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#FFE4E6",
+  "theme_color": "#FFE4E6",
   "description": "bird game - Choose your character and fly!",
   "icons": [
     {
