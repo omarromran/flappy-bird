@@ -15,9 +15,13 @@ const avatarOptions = document.querySelectorAll('.avatar-option:not(.upload-opti
 const uploadTrigger = document.getElementById('upload-trigger');
 const avatarUpload = document.getElementById('avatar-upload');
 
-// Set canvas dimensions
-canvas.width = 400;
-canvas.height = 600;
+// Dynamic canvas dimensions
+function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
 // Game constants
 const GRAVITY = 0.25;
@@ -30,7 +34,7 @@ const BIRD_SIZE = 40;
 // Game state
 let bird = {
     x: 50,
-    y: 300,
+    y: canvas.height / 2,
     velocity: 0,
     radius: 18,
     img: new Image()
@@ -163,7 +167,7 @@ avatarUpload.addEventListener('change', (e) => {
 
 // Game Logic
 function init() {
-    bird.y = 300;
+    bird.y = canvas.height / 2;
     bird.velocity = 0;
     pipes = [];
     score = 0;

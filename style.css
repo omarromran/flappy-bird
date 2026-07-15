@@ -1,14 +1,14 @@
 :root {
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --bg-dark: #020617;
-    --text-white: #f8fafc;
-    --accent: #f59e0b;
-    --accent-red: #ef4444;
-    --glass: rgba(255, 255, 255, 0.05);
-    --glass-bright: rgba(255, 255, 255, 0.12);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --ios-bg: #000000;
+    --ios-surface: #1c1c1e;
+    --ios-surface-light: #2c2c2e;
+    --ios-blue: #0a84ff;
+    --ios-blue-hover: #0070e0;
+    --ios-text: #ffffff;
+    --ios-text-secondary: rgba(235, 235, 245, 0.6);
+    --glass-bg: rgba(28, 28, 30, 0.75);
+    --safe-top: env(safe-area-inset-top, 47px);
+    --safe-bottom: env(safe-area-inset-bottom, 34px);
 }
 
 * {
@@ -17,68 +17,46 @@
     box-sizing: border-box;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    font-family: 'Outfit', sans-serif;
-    background: var(--bg-dark);
+    background: var(--ios-bg);
+    color: var(--ios-text);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
-    color: var(--text-white);
-}
-
-/* Background Animation */
-body::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, #1e1b4b 0%, #020617 70%);
-    z-index: -1;
-    animation: bgRotate 20s linear infinite;
-}
-
-@keyframes bgRotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+    position: fixed;
+    width: 100%;
 }
 
 #game-container {
     position: relative;
-    width: 400px;
-    height: 600px;
-    background: #0f172a;
-    box-shadow: var(--shadow-lg), 0 0 100px rgba(99, 102, 241, 0.1);
-    border-radius: 32px;
+    width: 100%;
+    max-width: 430px;
+    height: 100%;
+    background: var(--ios-bg);
     overflow: hidden;
-    border: 1px solid var(--glass-border);
 }
 
-/* Subtle Vignette */
-#game-container::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
-    pointer-events: none;
-    z-index: 2;
+@media (min-width: 431px) {
+    #game-container {
+        border-radius: 40px;
+        border: 8px solid #333;
+        height: 90vh;
+        max-height: 932px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
 }
 
 canvas {
     display: block;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #1e293b, #0f172a);
+    background: linear-gradient(to bottom, #000000, #1c1c1e);
 }
 
 .screen {
@@ -89,240 +67,180 @@ canvas {
     justify-content: center;
     align-items: center;
     z-index: 10;
-    background: rgba(2, 6, 23, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 2.5rem;
-    text-align: center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    transition: opacity 0.3s ease;
+    padding: 24px;
+    padding-top: calc(24px + var(--safe-top));
+    padding-bottom: calc(24px + var(--safe-bottom));
 }
 
 .hidden {
     opacity: 0;
     pointer-events: none;
-    transform: scale(1.1);
 }
 
 h1 {
-    font-size: 3.5rem;
-    font-weight: 900;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-    -webkit-text-fill-color: transparent;
-    text-transform: uppercase;
-    letter-spacing: -2px;
-    line-height: 1;
-    filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.3));
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 24px;
 }
 
 p {
-    margin-bottom: 2.5rem;
-    opacity: 0.6;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
+    font-size: 15px;
+    color: var(--ios-text-secondary);
+    margin-bottom: 32px;
+    text-align: center;
 }
 
 .avatar-selector {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    background: var(--ios-surface);
+    padding: 16px;
+    border-radius: 20px;
+    margin-bottom: 40px;
     width: 100%;
 }
 
 .avatar-option {
     aspect-ratio: 1;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
+    background: var(--ios-surface-light);
+    border-radius: 50%;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
-    overflow: hidden;
+    transition: transform 0.2s;
 }
 
-.avatar-option:hover {
-    transform: translateY(-8px) scale(1.05);
-    background: var(--glass-bright);
-    border-color: var(--primary);
-    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+.avatar-option:active {
+    transform: scale(0.9);
 }
 
 .avatar-option.selected {
-    border-color: var(--accent);
-    background: rgba(245, 158, 11, 0.08);
-    box-shadow: 0 0 25px rgba(245, 158, 11, 0.2), inset 0 0 10px rgba(245, 158, 11, 0.1);
-}
-
-.avatar-option.selected::before {
-    content: '';
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 8px;
-    height: 8px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent);
+    box-shadow: 0 0 0 3px var(--ios-blue);
 }
 
 .avatar-option img {
-    width: 85%;
-    height: 85%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     border-radius: 50%;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 .upload-option {
     flex-direction: column;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-white);
-    opacity: 0.8;
+    font-size: 11px;
+    color: var(--ios-blue);
+    font-weight: 500;
+    background: transparent;
+    border: 1px dashed rgba(10, 132, 255, 0.5);
 }
 
 .upload-icon {
-    font-size: 1.8rem;
-    margin-bottom: 4px;
-    color: var(--primary);
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: 2px;
 }
 
 .main-btn {
-    background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+    background: var(--ios-blue);
     color: white;
     border: none;
-    padding: 1.2rem 2.5rem;
-    font-size: 1.1rem;
-    font-weight: 800;
-    border-radius: 18px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 1rem;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 14px;
     width: 100%;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
-}
-
-.main-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6);
-    filter: brightness(1.1);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 12px;
 }
 
 .main-btn:active {
-    transform: translateY(1px);
+    background: var(--ios-blue-hover);
+    transform: scale(0.98);
 }
 
 .secondary-btn {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-white);
-    border: 1px solid var(--glass-border);
-    padding: 1rem 2rem;
-    font-size: 0.9rem;
+    background: var(--ios-surface);
+    color: var(--ios-blue);
+    border: none;
+    padding: 16px;
+    font-size: 17px;
     font-weight: 600;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
+    border-radius: 14px;
     width: 100%;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.secondary-btn:hover {
-    background: var(--glass-bright);
-    border-color: rgba(255, 255, 255, 0.3);
+.secondary-btn:active {
+    background: var(--ios-surface-light);
+    transform: scale(0.98);
+}
+
+.instructions {
+    margin-top: auto;
+    font-size: 13px;
+    color: var(--ios-text-secondary);
 }
 
 .score-card {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    padding: 2rem;
-    border-radius: 24px;
-    margin-bottom: 2.5rem;
+    background: var(--ios-surface);
+    border-radius: 20px;
+    padding: 24px;
     width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-
-.score-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
-    pointer-events: none;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    margin-bottom: 32px;
+    align-items: center;
 }
 
 .score-label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    opacity: 0.4;
-    margin-bottom: 0.4rem;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ios-text);
+    text-align: left;
 }
 
 .score-value {
-    font-size: 3rem;
-    font-weight: 900;
-    margin-bottom: 1.5rem;
-    line-height: 1;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: right;
 }
 
-.score-value:last-child {
-    margin-bottom: 0;
-    color: var(--accent);
+#best-score {
+    color: var(--ios-blue);
 }
 
 #game-ui {
     position: absolute;
-    top: 40px;
+    top: calc(40px + var(--safe-top));
     width: 100%;
     display: flex;
     justify-content: center;
     z-index: 5;
     pointer-events: none;
-    transition: opacity 0.3s ease;
 }
 
 #current-score {
-    font-size: 5rem;
-    font-weight: 900;
+    font-size: 60px;
+    font-weight: 800;
     color: white;
-    text-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    opacity: 0.9;
-}
-
-.instructions {
-    margin-top: 2rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
-    letter-spacing: 0.5px;
-}
-
-.instructions b {
-    color: var(--primary);
-}
-
-/* Animations */
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-#start-screen h1 {
-    animation: float 4s ease-in-out infinite;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    -webkit-text-stroke: 2px #000;
 }
